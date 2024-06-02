@@ -1,4 +1,5 @@
-﻿using DTOValidatorCentralizedConfiguration.Resources;
+﻿using DTOValidatorCentralizedConfiguration.Repository;
+using DTOValidatorCentralizedConfiguration.Resources;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -11,16 +12,25 @@ namespace DTOValidatorCentralizedConfiguration.Controllers
     public class TestLocalizationController : ControllerBase
     {
         private readonly IStringLocalizer<SharedResource> _stringLocalizer;
+        private readonly IEyesColorRepository _eyesColorRepository;
 
-        public TestLocalizationController(IStringLocalizer<SharedResource> stringLocalizer)
+        public TestLocalizationController(IStringLocalizer<SharedResource> stringLocalizer, IEyesColorRepository eyesColorRepository)
         {
             this._stringLocalizer = stringLocalizer;
+            this._eyesColorRepository = eyesColorRepository;
         }
 
         [HttpGet]
         public string Get()
         {
             return _stringLocalizer["msg_hello"];
+        }
+
+        [HttpGet("GetEyesColor")]
+        public IActionResult GetEyesColor()
+        {
+            var eyesColor = _eyesColorRepository.GetEyesColor();
+            return Ok(eyesColor);
         }
     }
 }

@@ -1,6 +1,9 @@
 using DTOValidatorCentralizedConfiguration.Configurations;
+using DTOValidatorCentralizedConfiguration.Repository;
+using DTOValidatorCentralizedConfiguration.Resources;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using ResultNet;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +14,8 @@ builder.Services.AddDbContext<LocalizationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 }, ServiceLifetime.Singleton);
 
-var context = builder.Services.BuildServiceProvider().GetRequiredService<LocalizationDbContext>();
-context.Database.EnsureCreated();
+//var context = builder.Services.BuildServiceProvider().GetRequiredService<LocalizationDbContext>();
+//context.Database.EnsureCreated();
 
 // Custom Localization Configuration
 builder.Services.AddSingleton<IStringLocalizerFactory, DatabaseStringLocalizerFactory>();
@@ -33,14 +36,15 @@ localizationOptions.SupportedUICultures = supportedCultures;
 localizationOptions.SetDefaultCulture("en-US");
 localizationOptions.ApplyCurrentCultureToResponseHeaders = true;
 
-//builder.Services.AddLocalization();
-//builder.Services.Configure<RequestLocalizationOptions>(options =>
-//{
-//    options.DefaultRequestCulture = new RequestCulture("en-US");
-//    options.SupportedCultures = supportedCultures;
-//    options.SupportedUICultures = supportedCultures;
-//});
+// Injecction
+builder.Services.AddScoped<IEyesColorRepository, EyesColorRepository>();
 
+// Result
+ResultMessageLocalizer.GetText = (textCode, languageCode) =>
+{
+    var stringLocalizer = builder.Services.BuildServiceProvider().GetRequiredService<IStringLocalizer>();
+    return stringLocalizer[textCode].Value;
+};
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
